@@ -6,10 +6,15 @@ from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 from telegram.constants import ParseMode
 
 from app.db.models import Streamer
+from app.telegram.post_init import post_init
 import config
 
 
 def allowed_user(func):
+    """
+    用户鉴权 - 仅允许指定 ID 的用户使用 bot
+    """
+
     @wraps(func)
     async def wrapper(
         update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs
@@ -20,6 +25,13 @@ def allowed_user(func):
         return await func(update, context, *args, **kwargs)
 
     return wrapper
+
+
+@allowed_user
+async def start_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = "这是一个B 站直播推送 bot\n输入 /add 开始添加监听用户"
+
+    await update.message.reply_text(text)
 
 
 @allowed_user
@@ -141,8 +153,9 @@ async def set_silent(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def run_polling():
     TOKEN = config.BOT_TOKEN
 
-    application = ApplicationBuilder().token(TOKEN).build()
+    application = ApplicationBuilder().token(TOKEN).post_init(post_init).build()
 
+    application.add_handler(CommandHandler("start", start_helper))
     application.add_handler(CommandHandler("add", add_streamer))
     application.add_handler(CommandHandler("rm", rm_streamer))
     application.add_handler(CommandHandler("ls", ls_streamer))

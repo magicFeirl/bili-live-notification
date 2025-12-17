@@ -26,7 +26,7 @@ class Streamer:
     live_end: Optional[datetime] = None  # 下播时间
 
     is_delete: bool = False  # 是否被标记删除，默认 False
-    silent: int = 0  # 0 or 1 是否静音推送 (对应原需求的 slient)
+    silent: bool = False  # 是否静音推送
 
     async def update_streamer_from_bilibili(self, username=False):
         """调用接口，原地更新主播信息
@@ -78,7 +78,7 @@ class Streamer:
 
     @property
     def silent_text(self):
-        return "🔕 静音" if self.silent == 1 else "🔔 提醒"
+        return "🔕 静音" if self.silent else "🔔 提醒"
 
     @property
     def notification_text(self):

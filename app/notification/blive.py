@@ -36,5 +36,8 @@ async def notification():
             media = [InputMediaPhoto(await streamer.download_cover())]
 
             await bot.send_media_group(
-                user, media=media, caption=streamer.notification_text
+                user,
+                media=media,
+                caption=streamer.notification_text,
+                disable_notification=streamer.silent,
             )
