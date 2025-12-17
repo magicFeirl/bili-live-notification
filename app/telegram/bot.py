@@ -48,25 +48,30 @@ async def add_streamer(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     try:
-        user = Streamer.find_one(int(args[0]))
-        if not user:
-            message = await update.message.reply_text("开始获取直播间信息...")
-            # 获取并保存主播信息
-            await user.update_streamer_from_bilibili(username=True)
-            user.create()
+        rid = int(args[0])
+        user = Streamer(rid)
 
-            cover_media = [InputMediaPhoto(await user.download_cover())]
-
-            await update.message.reply_media_group(
-                cover_media,
-                caption=f"✅ 已添加直播间：\n{user.info}",
-                parse_mode=ParseMode.HTML,
-            )
-            await message.delete()
-        else:
+        if find_user := user.find_one(rid):
             await update.message.reply_text(
-                f"⚠️ 直播间已存在\n{user.info}", parse_mode=ParseMode.HTML
+                f"⚠️ 直播间已存在\n{find_user.info}", parse_mode=ParseMode.HTML
             )
+
+            return
+
+        message = await update.message.reply_text("开始获取直播间信息...")
+        # 获取并保存主播信息
+        await user.update_streamer_from_bilibili(username=True)
+        user.create()
+
+        cover_media = [InputMediaPhoto(await user.download_cover())]
+
+        await update.message.reply_media_group(
+            cover_media,
+            caption=f"✅ 已添加直播间：\n{user.info}",
+            parse_mode=ParseMode.HTML,
+        )
+        await message.delete()
+
     except ValueError:
         await update.message.reply_text("❌ 直播间ID 必须是数字。")
 
