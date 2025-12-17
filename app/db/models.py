@@ -74,7 +74,7 @@ class Streamer:
 
     @property
     def status_text(self):
-        return "🟢 直播中" if self.status == 1 else "⚫ 未开播"
+        return "🟢 直播中" if self.status == 1 else "🔴 未开播"
 
     @property
     def silent_text(self):
@@ -82,9 +82,11 @@ class Streamer:
 
     @property
     def notification_text(self):
+        status_icon = '🟢' if self.status else '🔴'
+        status_action = '开' if self.status else '下' 
         """开播通知文本"""
         s = f"""
-        🔴 {self.name} 开播了
+        {status_icon} {self.name} {status_action}播了
 
         📺 标题：{self.title}
         ⏰ 时间：{self.live_start}
