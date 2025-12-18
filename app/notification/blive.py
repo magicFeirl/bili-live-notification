@@ -25,7 +25,12 @@ async def notification():
         for streamer in Streamer.all():
             # 找出当前直播状态 != 上次直播状态的直播间
             current_status = streamer.status
-            streamer = await streamer.update_streamer_from_bilibili()
+            
+            try:
+                streamer = await streamer.update_streamer_from_bilibili()
+            except Exception:
+                continue
+
             print(streamer.name, current_status, streamer.status)
 
             if streamer.status == current_status:
