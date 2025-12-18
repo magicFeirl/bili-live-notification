@@ -53,7 +53,7 @@ async def notification():
             # 仅开播显示观看按钮
             await bot.send_photo(
                 user,
-                photo=InputMediaPhoto(await streamer.download_cover()),
+                photo=await streamer.download_cover(),
                 caption=streamer.notification_text,
                 disable_notification=streamer.silent,
                 reply_markup=reply_markup if streamer.status else None,
