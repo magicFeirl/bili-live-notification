@@ -38,7 +38,6 @@ async def notification():
 
             streamer.update(asdict(streamer))
 
-            media = [InputMediaPhoto(await streamer.download_cover())]
             from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
             room_id = streamer.room_id
@@ -52,9 +51,9 @@ async def notification():
             reply_markup = InlineKeyboardMarkup(keyboard)
 
             # 仅开播显示观看按钮
-            await bot.send_media_group(
+            await bot.send_photo(
                 user,
-                media=media,
+                photo=InputMediaPhoto(await streamer.download_cover()),
                 caption=streamer.notification_text,
                 disable_notification=streamer.silent,
                 reply_markup=reply_markup if streamer.status else None,
