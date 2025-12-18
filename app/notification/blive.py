@@ -41,12 +41,11 @@ async def notification():
             from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
             room_id = streamer.room_id
-            btn_app = InlineKeyboardButton(text="看!", url=f"bilibili://live/{room_id}")
             btn_h5 = InlineKeyboardButton(
-                text="看(h5)!", url=f"https://live.bilibili.com/h5/{room_id}"
+                text="看！", url=f"https://live.bilibili.com/h5/{room_id}"
             )
 
-            keyboard = [[btn_app, btn_h5]]
+            keyboard = [[btn_h5]]
 
             reply_markup = InlineKeyboardMarkup(keyboard)
 
