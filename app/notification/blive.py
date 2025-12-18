@@ -25,7 +25,7 @@ async def notification():
         for streamer in Streamer.all():
             # 找出当前直播状态 != 上次直播状态的直播间
             current_status = streamer.status
-            
+
             try:
                 streamer = await streamer.update_streamer_from_bilibili()
             except Exception:
@@ -39,10 +39,23 @@ async def notification():
             streamer.update(asdict(streamer))
 
             media = [InputMediaPhoto(await streamer.download_cover())]
+            from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
+            room_id = streamer.room_id
+            btn_app = InlineKeyboardButton(text="看!", url=f"bilibili://live/{room_id}")
+            btn_h5 = InlineKeyboardButton(
+                text="看(h5)!", url=f"https://live.bilibili.com/h5/{room_id}"
+            )
+
+            keyboard = [[btn_app, btn_h5]]
+
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            # 仅开播显示观看按钮
             await bot.send_media_group(
                 user,
                 media=media,
                 caption=streamer.notification_text,
                 disable_notification=streamer.silent,
+                reply_markup=reply_markup if streamer.status else None,
             )

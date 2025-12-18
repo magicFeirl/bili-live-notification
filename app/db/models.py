@@ -84,9 +84,10 @@ class Streamer:
     def notification_text(self):
         status_icon = '🟢' if self.status else '🔴'
         status_action = '开' if self.status else '下' 
+        
         """开播通知文本"""
         s = f"""
-        {status_icon} {self.name} {status_action}播了
+        {status_icon} #{self.name} {status_action}播了
 
         📺 标题：{self.title}
         ⏰ 时间：{self.live_start}
