@@ -7,8 +7,8 @@ async def register_command(application: Application):
         BotCommand("start", "start"),
         BotCommand("add", "添加直播间"),
         BotCommand("rm", "移除直播间"),
-        BotCommand("ls", "查看列表"),
-        BotCommand("silent", "静音设置"),
+        BotCommand("ls", "查看直播间列表"),
+        BotCommand("silent", "静音推送设置"),
         # BotCommand("help", "获取帮助"),
     ]
 

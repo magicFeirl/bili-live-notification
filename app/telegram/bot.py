@@ -20,8 +20,27 @@ def allowed_user(func):
         update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs
     ):
         user_id = update.effective_user.id
+
         if user_id not in config.ADMIN_USERS:
             return
+
+        # 添加参数校验
+        cmd = update.message.text.split(" ")[0]
+        context_args = context.args
+
+        if cmd in ["/add", "/rm", "/silent"]:
+            err_msg = ""
+            if len(context_args) != 1:
+                err_msg = f"❌ 无效的参数量. {cmd} 仅接受一个参数."
+
+            room_id = context_args[0]
+            if not room_id.isdigit() or int(room_id) <= 0:
+                err_msg = f"❌ 无效的房间号: {room_id}"
+
+            if err_msg:
+                await update.effective_message.reply_text(err_msg)
+                return
+
         return await func(update, context, *args, **kwargs)
 
     return wrapper
@@ -29,7 +48,7 @@ def allowed_user(func):
 
 @allowed_user
 async def start_helper(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = "这是一个B 站直播推送 bot\n输入 /add 开始添加监听用户"
+    text = "这是一个 B 站直播推送 bot\n输入 /add 开始添加监听用户"
 
     await update.message.reply_text(text)
 
@@ -40,26 +59,18 @@ async def add_streamer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     指令: /add <room_id>
     示例: /add 1001
     """
-    args = context.args
-    if len(args) != 1:
+    rid = int(context.args[0])
+    user = Streamer(rid)
+
+    if _user := user.find_one(rid):
         await update.message.reply_text(
-            "❌ 格式错误。\n用法: /add <直播间ID>\n或批量添加 /add <ID1>, <ID2>, ..."
+            f"⚠️ 直播间已存在\n{_user.info}", parse_mode=ParseMode.HTML
         )
         return
 
+    # 获取并保存主播信息
+    pong_message = await update.message.reply_text("开始获取直播间信息...")
     try:
-        rid = int(args[0])
-        user = Streamer(rid)
-
-        if find_user := user.find_one(rid):
-            await update.message.reply_text(
-                f"⚠️ 直播间已存在\n{find_user.info}", parse_mode=ParseMode.HTML
-            )
-
-            return
-
-        message = await update.message.reply_text("开始获取直播间信息...")
-        # 获取并保存主播信息
         await user.update_streamer_from_bilibili(username=True)
         user.create()
 
@@ -70,10 +81,10 @@ async def add_streamer(update: Update, context: ContextTypes.DEFAULT_TYPE):
             caption=f"✅ 已添加直播间：\n{user.info}",
             parse_mode=ParseMode.HTML,
         )
-        await message.delete()
-
-    except ValueError:
-        await update.message.reply_text("❌ 直播间ID 必须是数字。")
+    except Exception:
+        await update.message.reply_text(f"无法获取直播间: {user.room_id} 的信息")
+    finally:
+        await pong_message.delete()
 
 
 @allowed_user
